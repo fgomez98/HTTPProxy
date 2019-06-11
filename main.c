@@ -13,6 +13,11 @@
 
 #include "Utils/selector.h"
 #include "proxy5nio.h"
+#include "config.h"
+
+proxy_configs global_variable = { /* Definition checked against declaration */
+
+};
 
 static bool done = false;
 
@@ -38,12 +43,14 @@ main(const int argc, const char **argv) {
     selector_status ss = SELECTOR_SUCCESS;
     fd_selector selector = NULL;
 
+    //configs del socket
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
+    addr.sin_family      = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(port);
+    addr.sin_port        = htons(port);
 
+    //nuevo socket
     const int server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (server < 0) {
         err_msg = "unable to create socket";
@@ -52,9 +59,11 @@ main(const int argc, const char **argv) {
 
     fprintf(stdout, "Listening on TCP port %d\n", port);
 
+    // seteamos options para el socket
     // man 7 ip. no importa reportar nada si falla.
     setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &(int) {1}, sizeof(int));
 
+    // bind del socket a addr
     if (bind(server, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         err_msg = "unable to bind socket";
         goto finally;
